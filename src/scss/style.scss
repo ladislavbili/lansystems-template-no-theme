@@ -1,0 +1,29 @@
+.row{
+  margin:0px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.sidebarContainer{
+  width:$sidebar-width;
+  height: $sidebar-height;
+  background-color: lightGrey;
+  padding: 20px 10px;
+}
+
+.header{
+  height: $header-height;
+  border-radius:0;
+  border-bottom: 2px solid #8db9df;
+  color: black;
+}
+
+.headerDropdown{
+  background-color:inherit;
+  border-width:0
+}
+
+.center-hor{
+  margin-top: auto;
+  margin-bottom: auto;
+}
