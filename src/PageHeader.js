@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Navbar, Nav,DropdownButton,MenuItem, Glyphicon, Dropdown } from 'react-bootstrap';
+import { Navbar, Nav,DropdownButton,MenuItem, Glyphicon, Dropdown, Button } from 'react-bootstrap';
 
 export default class PageHeader extends Component{
 
@@ -34,20 +34,20 @@ export default class PageHeader extends Component{
             className="headerDropdown"
             >
             <MenuItem onClick={()=>this.props.history.push('/cmdb')}>CMDB</MenuItem>
-            <MenuItem onClick={()=>this.props.history.push('/lanwiki')}>LanWiki</MenuItem>
             <MenuItem onClick={()=>this.props.history.push('/helpdesk')}>Helpdesk</MenuItem>
           </DropdownButton>
         </Navbar.Brand>
         <Nav pullRight>
           <Dropdown pullRight id="settings">
             <Dropdown.Toggle noCaret className="headerDropdown">
-              <Glyphicon glyph="log-out" className="center-hor" />
+              <Glyphicon glyph="cog" className="center-hor" />
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/companies')}>Companies</MenuItem>
-              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/users')}>Users</MenuItem>
+              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/projects')}>Projects</MenuItem>
+              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/statuses')}>Statuses</MenuItem>
             </Dropdown.Menu>
           </Dropdown>
+          <Button className="no-border"><Glyphicon glyph="log-out" className="center-hor" /></Button>
         </Nav>
       </header>
     )

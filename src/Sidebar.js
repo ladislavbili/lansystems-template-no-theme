@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import Select from 'react-select';
-import { Modal, Nav,  NavItem, ListGroup } from 'react-bootstrap';
-import ProjectEdit from './ProjectEdit';
-import ProjectAdd from './ProjectAdd';
+import { Nav,  NavItem, ListGroup } from 'react-bootstrap';
 import {rebase} from './index';
 
 export default class Tags extends Component{
@@ -43,7 +41,7 @@ export default class Tags extends Component{
       return project;
     });
     return (
-      <ListGroup className='sidebarContainer fullWidth'>
+      <ListGroup className='sidebarContainer fullWidth m-b-0'>
           <label>Project</label>
           <Select
             options={projects}
@@ -51,17 +49,6 @@ export default class Tags extends Component{
             onChange={e =>{ this.setState({ project: e }); this.props.history.push('/project/'+e.id)}}
             />
 
-          <Nav bsStyle="pills" stacked>
-            {
-              this.state.project.id!=='all' &&
-              <NavItem onClick={()=>{this.setState({openEditProject:true})}}>
-                Project settings
-              </NavItem>
-            }
-            <NavItem onClick={()=>{this.setState({openAddProject:true})}} >
-              Add project
-            </NavItem>
-          </Nav>
         <label>Filters</label>
         <Nav bsStyle="pills" stacked activeKey={this.state.adress} onSelect={(adress)=>{this.props.history.push("/helpdesk/filter/all");this.setState({adress})}}>
           <NavItem eventKey={'/helpdesk/mytasks'}>
@@ -71,22 +58,6 @@ export default class Tags extends Component{
             All tasks
           </NavItem>
         </Nav>
-          <Modal show={this.state.openEditProject} onHide={()=>{this.setState({openEditProject:false})}}>
-            <Modal.Header closeButton>
-              <Modal.Title>Editing project</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <ProjectEdit closeModal={()=>{this.setState({openEditProject:false})}} id={this.state.project.id} />
-            </Modal.Body>
-          </Modal>
-          <Modal show={this.state.openAddProject} onHide={()=>{this.setState({openAddProject:false})}}>
-            <Modal.Header closeButton>
-              <Modal.Title>Adding project</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <ProjectAdd closeModal={()=>{this.setState({openAddProject:false})}} />
-            </Modal.Body>
-          </Modal>
 
       </ListGroup>
     );
