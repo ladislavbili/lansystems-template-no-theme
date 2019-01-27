@@ -50,12 +50,12 @@ export default class Tags extends Component{
             />
 
         <label>Filters</label>
-        <Nav bsStyle="pills" stacked activeKey={this.state.adress} onSelect={(adress)=>{this.props.history.push("/helpdesk/filter/all");this.setState({adress})}}>
-          <NavItem eventKey={'/helpdesk/mytasks'}>
-            My tasks
-          </NavItem>
-          <NavItem eventKey={"/helpdesk/filter/all"}>
+        <Nav bsStyle="pills" stacked activeKey={this.state.adress} onSelect={(adress)=>{this.props.history.push(adress);this.setState({adress})}}>
+          <NavItem eventKey={"/helpdesk/mytasks"}>
             All tasks
+          </NavItem>
+          <NavItem eventKey={'/helpdesk/filter/all'}>
+            Trojstlpec
           </NavItem>
         </Nav>
 

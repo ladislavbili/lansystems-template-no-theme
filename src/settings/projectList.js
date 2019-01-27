@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, FormGroup, FormControl,InputGroup, Glyphicon, Button } from 'react-bootstrap';
+import { Table, FormGroup, FormControl,InputGroup, Glyphicon } from 'react-bootstrap';
 import {rebase} from '../index';
 import ProjectAdd from './projectAdd';
 import ProjectEdit from './projectEdit';
@@ -28,9 +28,6 @@ export default class ProjectList extends Component{
       <div className="row flex container container-padding center-ver">
         <div className="col-6">
           <FormGroup>
-          <Button onClick={()=>this.props.history.push('/helpdesk/settings/projects/add')}>+ Add project</Button>
-          </FormGroup>
-          <FormGroup>
             <InputGroup>
               <FormControl type="text" onChange={(e)=>this.setState({projectFilter:e.target.value})} />
               <InputGroup.Addon>
@@ -45,6 +42,9 @@ export default class ProjectList extends Component{
               </tr>
             </thead>
             <tbody>
+              <tr className="clickable" onClick={()=>this.props.history.push('/helpdesk/settings/projects/add')}>
+                <td>+ Add project</td>
+              </tr>
               {this.state.projects.filter((item)=>item.title.toLowerCase().includes(this.state.projectFilter.toLowerCase())).map((project)=>
                 <tr key={project.id} className="clickable" onClick={()=>this.props.history.push('/helpdesk/settings/projects/'+project.id)}>
                   <td>{project.title}</td>

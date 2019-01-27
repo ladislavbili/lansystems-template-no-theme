@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormGroup, FormControl, Button, Col, ControlLabel } from 'react-bootstrap';
+import { FormGroup, FormControl, Button, Col, ControlLabel, Alert } from 'react-bootstrap';
 import Select from 'react-select';
 import {rebase} from './index';
 
@@ -7,17 +7,55 @@ export default class TaskEdit extends Component{
   constructor(props){
     super(props);
     this.state={
+      saving:false,
+      loading:true,
+      users:[],
+      companies:[],
+      workTypes:[],
       statuses:[],
       projects:[],
-      saving:false,
+      task:null,
+
+      title:'',
+      company:null,
+      workHours:'0',
+      workType:null,
+      requester:null,
+      assigned:null,
       description:'',
       status:null,
+      statusChange:null,
       project:null,
-      title:'',
-      description:'',
-      task:null
+      pausal:{value:true,label:'Pausal'},
     }
-    rebase.get('tasks/'+this.props.match.params.taskID, {
+    this.fetchData(this.props.match.params.taskID);
+  }
+
+  submitTask(){
+    this.setState({saving:true});
+    let body = {
+      title: this.state.title,
+      company: this.state.company?this.state.company.id:null,
+      workHours: this.state.workHours,
+      workType: this.state.workType?this.state.workType.id:null,
+      requester: this.state.requester?this.state.requester.id:null,
+      assigned: this.state.assigned?this.state.assigned.id:null,
+      description: this.state.description,
+      status: this.state.status?this.state.status.id:null,
+      statusChange: this.state.statusChange,
+      project: this.state.project?this.state.project.id:null,
+      pausal: this.state.pausal.value,
+    }
+    rebase.updateDoc('/tasks/'+this.state.task.id, body)
+    .then(()=>{
+      if(!this.props.columns){
+        this.props.history.goBack()
+      }
+    });
+  }
+
+  fetchData(taskID){
+    rebase.get('tasks/'+taskID, {
       context: this,
       withIds: true,
     }).then((task)=>{rebase.get('/statuses', {
@@ -28,56 +66,254 @@ export default class TaskEdit extends Component{
       context: this,
       withIds: true,
     }).then((projects)=>{
-      let project = projects.find((item)=>item.id===task.project);
-      let status = statuses.find((item)=>item.id===task.status);
-      this.setState({
-        task,
-        statuses,
-        projects,
-        description:task.description,
-        title:task.title,
-        status:status?{...status,value:status.id,label:status.title}:null,
-        project:project?{...project,value:project.id,label:project.title}:null});
+      rebase.get('/users', {
+        context: this,
+        withIds: true,
+      }).then((users)=>{
+        rebase.get('/companies', {
+          context: this,
+          withIds: true,
+        }).then((companies)=>{
+          rebase.get('/workTypes', {
+            context: this,
+            withIds: true,
+          }).then((workTypes)=>{
+            this.setData(task, this.toSelArr(statuses), this.toSelArr(projects),this.toSelArr(users,'email'),this.toSelArr(companies),this.toSelArr(workTypes));
+          });
+        });
+      });
     })})});
+  }
+
+  toSelArr(arr,index = 'title'){
+    return arr.map((item)=>{return {...item,value:item.id,label:item[index]}})
+  }
+
+  setData(task, statuses, projects,users,companies,workTypes){
+    let project = projects.find((item)=>item.id===task.project);
+    let status = statuses.find((item)=>item.id===task.status);
+    let company = companies.find((item)=>item.id===task.company);
+    let workType = workTypes.find((item)=>item.id===task.workType);
+    let requester = users.find((item)=>item.id===task.requester);
+    let assigned = users.find((item)=>item.id===task.assigned);
+
+
+
+    this.setState({
+      task,
+      statuses,
+      projects,
+      users,
+      companies,
+      workTypes,
+
+      description:task.description,
+      title:task.title,
+      pausal:task.pausal?{value:true,label:'Pausal'}:{value:false,label:'Project'},
+      status:status?status:null,
+      statusChange:task.statusChange?task.statusChange:null,
+      project:project?project:null,
+      company:company?company:null,
+      workHours:isNaN(parseInt(task.workHours))?0:parseInt(task.workHours),
+      workType:workType?workType:null,
+      requester:requester?requester:null,
+      assigned:assigned?assigned:null,
+      loading:false
+    });
   }
 
   render(){
     return (
       <div className="container container-padding">
-        <FormGroup>
-          <Col sm={2}>
-            <ControlLabel className="center-hor">Task name</ControlLabel>
-          </Col>
-          <Col sm={10}>
-            <FormControl type="text" placeholder="Enter task name" value={this.state.title} onChange={(e)=>this.setState({title:e.target.value})} />
-          </Col>
-        </FormGroup>
-        <FormGroup>
-          <Col sm={2}>
-            <ControlLabel className="center-hor">Task status</ControlLabel>
-          </Col>
-          <Col sm={10}>
-            <Select
-              value={this.state.status}
-              onChange={(status)=>this.setState({status})}
-              options={this.state.statuses.map((status)=>{return {...status,value:status.id,label:status.title}})}
-              />
-          </Col>
-        </FormGroup>
+        {
+          this.state.loading &&
+          <Alert bsStyle="success">
+            Loading data...
+          </Alert>
+        }
+        <Col sm={12}>
+          <FormGroup>
+            <Col sm={1}>
+              <ControlLabel className="center-hor">Task name</ControlLabel>
+            </Col>
+            <Col sm={11}>
+              <FormControl type="text" placeholder="Enter task name" value={this.state.title} onChange={(e)=>this.setState({title:e.target.value})} />
+            </Col>
+          </FormGroup>
+        </Col>
 
-        <FormGroup>
-          <Col sm={2}>
-            <ControlLabel className="center-hor">Task project</ControlLabel>
-          </Col>
-          <Col sm={10}>
-            <Select
-              value={this.state.project}
-              onChange={(project)=>this.setState({project})}
-              options={this.state.projects.map((project)=>{return {...project,value:project.id,label:project.title}})}
-              />
-          </Col>
-        </FormGroup>
+        <div className="floatingSeparator"></div>
+          <div className="taskDataContainer">
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Task status</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <Select
+                value={this.state.status}
+                onChange={(status)=>this.setState({status,statusChange:(new Date().getTime())})}
+                options={this.state.statuses.map((status)=>{return {...status,value:status.id,label:status.title}})}
+                />
+            </Col>
+          </FormGroup>
+        </Col>
 
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Status change</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <FormControl type="datetime-local" placeholder="Status change date" value={this.state.statusChange!=null?new Date(this.state.statusChange).toISOString().replace('Z',''):null} />
+            </Col>
+          </FormGroup>
+        </Col>
+
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Task project</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <Select
+                value={this.state.project}
+                onChange={(project)=>this.setState({project})}
+                options={this.state.projects}
+                />
+            </Col>
+          </FormGroup>
+        </Col>
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Start date</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <FormControl type="date" />
+            </Col>
+          </FormGroup>
+        </Col>
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Requester</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <Select
+                value={this.state.requester}
+                onChange={(requester)=>this.setState({requester})}
+                options={this.state.users}
+                />
+            </Col>
+          </FormGroup>
+        </Col>
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Deadline</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <FormControl type="date" />
+            </Col>
+          </FormGroup>
+        </Col>
+
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Company</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <Select
+                value={this.state.company}
+                onChange={(company)=>this.setState({company})}
+                options={this.state.companies}
+                />
+            </Col>
+          </FormGroup>
+        </Col>
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Repeat</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <FormControl type="text" />
+            </Col>
+          </FormGroup>
+        </Col>
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Assigned</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <Select
+                value={this.state.assigned}
+                onChange={(assigned)=>this.setState({assigned})}
+                options={this.state.users}
+                />
+            </Col>
+          </FormGroup>
+        </Col>
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Paušál</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <Select
+                value={this.state.pausal}
+                onChange={(pausal)=>this.setState({pausal})}
+                options={[{value:true,label:'Pausal'},{value:false,label:'Project'}]}
+                />
+            </Col>
+          </FormGroup>
+        </Col>
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Work hours</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <FormControl type="number" placeholder="Enter work hours" value={this.state.workHours} onChange={(e)=>this.setState({workHours:e.target.value})} />
+            </Col>
+          </FormGroup>
+        </Col>
+
+        <Col sm={6}>
+          <FormGroup>
+            <Col sm={2}>
+              <ControlLabel className="center-hor">Work Type</ControlLabel>
+            </Col>
+            <Col sm={10}>
+              <Select
+                value={this.state.workType}
+                onChange={(workType)=>this.setState({workType})}
+                options={this.state.workTypes}
+                />
+            </Col>
+          </FormGroup>
+        </Col>
+      </div>
+
+
+
+
+
+
+
+        <div className="floatingSeparator"></div>
         <FormGroup>
           <Col sm={2}>
             <ControlLabel className="center-hor">Description</ControlLabel>
@@ -87,11 +323,10 @@ export default class TaskEdit extends Component{
           </Col>
         </FormGroup>
 
-        <Button bsStyle="success" className="separate" disabled={this.state.title==="" || this.state.status===null || this.state.project === null||this.state.saving} onClick={()=>{
-            this.setState({saving:true});
-            rebase.updateDoc('/tasks/'+this.state.task.id, {title:this.state.title,project: this.state.project.id, status: this.state.status.id, description:this.state.description})
-              .then(()=>{this.props.history.goBack()});
-          }}>{this.state.saving?'Saving...':'Save task'}</Button>
+
+
+        <Button bsStyle="success" className="separate" disabled={this.state.title==="" || this.state.status===null || this.state.project === null||this.state.saving}
+          onClick={this.submitTask.bind(this)}>{this.state.saving?'Saving...':'Save task'}</Button>
       </div>
     );
   }

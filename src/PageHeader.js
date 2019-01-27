@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { Navbar, Nav,DropdownButton,MenuItem, Glyphicon, Dropdown, Button } from 'react-bootstrap';
+import {connect} from 'react-redux';
+import {loginUser} from './redux/actions';
+class PageHeader extends Component{
 
-export default class PageHeader extends Component{
-
-  constructor(){
-    super();
+  constructor(props){
+    super(props);
     this.state = {
       companies : []
     }
@@ -45,11 +46,24 @@ export default class PageHeader extends Component{
             <Dropdown.Menu>
               <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/projects')}>Projects</MenuItem>
               <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/statuses')}>Statuses</MenuItem>
+              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/units')}>Units</MenuItem>
+              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/companies')}>Companies</MenuItem>
+              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/workTypes')}>Work Type</MenuItem>
+              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/users')}>Users</MenuItem>
+              <MenuItem onClick={()=>this.props.history.push(this.getLocation()+'/settings/pricelists')}>Prices</MenuItem>
             </Dropdown.Menu>
           </Dropdown>
-          <Button className="no-border"><Glyphicon glyph="log-out" className="center-hor" /></Button>
+          <Button className="no-border"><Glyphicon glyph="log-out" className="center-hor" onClick={()=>this.props.loginUser('','',false)} /></Button>
         </Nav>
       </header>
     )
   }
 }
+
+
+const mapStateToProps = ({ loginReducer }) => {
+  const { isAuthenticated } = loginReducer;
+  return { isAuthenticated };
+};
+
+export default connect(mapStateToProps, { loginUser })(PageHeader);

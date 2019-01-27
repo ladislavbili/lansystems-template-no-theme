@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, FormGroup, FormControl,InputGroup, Glyphicon, Button } from 'react-bootstrap';
+import { Table, FormGroup, FormControl,InputGroup, Glyphicon } from 'react-bootstrap';
 import {rebase} from '../index';
 import StatusAdd from './statusAdd';
 import StatusEdit from './statusEdit';
@@ -28,9 +28,6 @@ export default class StatusesList extends Component{
       <div className="row flex container container-padding center-ver">
         <div className="col-6">
           <FormGroup>
-          <Button onClick={()=>this.props.history.push('/helpdesk/settings/statuses/add')}>+ Add status</Button>
-          </FormGroup>
-          <FormGroup>
             <InputGroup>
               <FormControl type="text" onChange={(e)=>this.setState({statusFilter:e.target.value})} />
               <InputGroup.Addon>
@@ -45,6 +42,9 @@ export default class StatusesList extends Component{
               </tr>
             </thead>
             <tbody>
+              <tr className="clickable" onClick={()=>this.props.history.push('/helpdesk/settings/statuses/add')}>
+                <td>+ Add status</td>
+              </tr>
               {this.state.statuses.filter((item)=>item.title.toLowerCase().includes(this.state.statusFilter.toLowerCase())).map((status)=>
                 <tr key={status.id} className="clickable" onClick={()=>this.props.history.push('/helpdesk/settings/statuses/'+status.id)}>
                   <td>{status.title}</td>

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import {Button,FormGroup,Table} from 'react-bootstrap';
 import {rebase} from './index';
+import TaskAdd from './taskAdd';
+import TaskEdit from './taskEdit';
 
 export default class TaskList extends Component{
   constructor(props){
@@ -44,9 +46,7 @@ export default class TaskList extends Component{
     })
     return (
       <div className="flex container container-padding center-ver">
-          <FormGroup>
-            <Button onClick={()=>this.props.history.push(this.props.location.pathname+'/task/add')}>+ Add task</Button>
-          </FormGroup>
+        <div className="col-6">
           <Table striped condensed hover>
             <thead>
               <th>Task name</th>
@@ -54,8 +54,11 @@ export default class TaskList extends Component{
               <th>Task project</th>
             </thead>
             <tbody>
+              <tr className="clickable" onClick={()=>this.props.history.push('/helpdesk/filter/'+this.props.match.params.filterID+'/add')}>
+                <td>+ Add task</td>
+              </tr>
               {tasks.map((task)=>
-                <tr key={task.id} className="clickable" onClick={()=>this.props.history.push(this.props.location.pathname+'/'+task.id)}>
+                <tr key={task.id} className="clickable" onClick={()=>this.props.history.push('/helpdesk/filter/'+this.props.match.params.filterID+'/'+task.id)}>
                   <td>{task.title}</td>
                   <td>{task.status?task.status.title:'Neznámy status'}</td>
                   <td>{task.project?task.project.title:'Neznámy projekt'}</td>
@@ -63,7 +66,18 @@ export default class TaskList extends Component{
               )}
             </tbody>
           </Table>
-      </div>
+        </div>
+          <div className="col-6 withSeparator">
+            {
+              this.props.match.params.taskID && this.props.match.params.taskID==='add' && <TaskAdd />
+            }
+            {
+              this.props.match.params.taskID && this.props.match.params.taskID!=='add' && this.state.tasks.some((item)=>item.id===this.props.match.params.taskID) &&
+              <TaskEdit match={this.props.match} columns={true} />
+            }
+          </div>
+
+        </div>
       );
     }
   }

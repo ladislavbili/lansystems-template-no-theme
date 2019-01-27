@@ -1,16 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import Navigation from './navigation';
-
+import { Provider } from 'react-redux';
 import {BrowserRouter, Route} from 'react-router-dom';
-
-import config from './firebase';
 import firebase from 'firebase';
 import Rebase from 're-base';
 
+
+import Login from './loginPage';
+import config from './firebase';
+import createStore from './redux/store';
+
 import './scss/index.scss';
 
+const store=createStore();
 const app = firebase.initializeApp(config);
 const db = firebase.firestore(app);
 const settings = { timestampsInSnapshots: true };
@@ -20,13 +22,13 @@ export let rebase = Rebase.createClass(db);
 
 const Root = () => {
   return(
-    <div>
+    <Provider store={store}>
       <BrowserRouter>
         <div>
-          <Route path='/' component={Navigation} />
+          <Route path='/' component={Login} />
         </div>
       </BrowserRouter>
-    </div>
+    </Provider>
   )
 }
 

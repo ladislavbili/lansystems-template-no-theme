@@ -75,3 +75,27 @@
 .float-right{
   float: right;
 }
+
+.loginWindow{
+  max-width:500px;
+}
+
+.separator{
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding:2px 2px 0px 2px;
+  border-top:solid lightGrey 4px;
+}
+.floatingSeparator{
+  margin-top: 7px;
+  margin-bottom: 11px;
+  border-top:solid lightGrey 4px;
+  float:left;
+  width:100%;
+}
+
+.taskDataContainer{
+  .col-sm-6{
+    height: 50px;
+  }
+}
