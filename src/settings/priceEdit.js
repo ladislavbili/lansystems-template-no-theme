@@ -118,10 +118,10 @@ export default class PriceEdit extends Component{
         </FormGroup>
         <Button bsStyle="success" className="separate" disabled={this.state.saving} onClick={()=>{
             this.setState({saving:true});
-            this.state.workTypes.filter((item)=>item.price.id!==undefined).map((workType)=>{
-              rebase.updateDoc('/prices/'+workType.price.id, {price:parseFloat(workType.price.price === "" ? "0": workType.price.price)});
-            });
-            this.state.workTypes.filter((item)=>item.price.id===undefined).map((workType)=>{
+            this.state.workTypes.filter((item)=>item.price.id!==undefined).map((workType)=>
+              rebase.updateDoc('/prices/'+workType.price.id, {price:parseFloat(workType.price.price === "" ? "0": workType.price.price)})
+            );
+            this.state.workTypes.filter((item)=>item.price.id===undefined).map((workType)=>
               rebase.addToCollection('/prices', {pricelist:this.props.match.params.id,workType:workType.id,price:parseFloat(workType.price.price === "" ? "0": workType.price.price)}).then((response)=>{
                 let index = this.state.workTypes.findIndex((item)=>item.id===workType.id);
                 let newWorkTypes=[...this.state.workTypes];
@@ -130,12 +130,12 @@ export default class PriceEdit extends Component{
                 newWorkTypes[index] = newWorkType;
                 this.setState({workTypes:newWorkTypes});
               })
-            })
+            )
 
             rebase.updateDoc('/pricelists/'+this.props.match.params.id, {title:this.state.pricelistName, afterHours:parseFloat(this.state.afterHours===''?'0':this.state.afterHours),materialMargin:parseFloat(this.state.margin===''?'0':this.state.margin)})
-              .then(()=>{
+              .then(()=>
                 this.setState({saving:false})
-              });
+              );
           }}>{this.state.saving?'Saving prices...':'Save prices'}</Button>
       </div>
     );

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, Button, Col, ControlLabel, Alert } from 'react-bootstrap';
 import Select from 'react-select';
-import {rebase} from './index';
+import {rebase} from '../index';
+import {toSelArr} from '../helperFunctions';
 
 export default class TaskEdit extends Component{
   constructor(props){
@@ -14,7 +15,6 @@ export default class TaskEdit extends Component{
       workTypes:[],
       statuses:[],
       projects:[],
-      task:null,
 
       title:'',
       company:null,
@@ -28,7 +28,7 @@ export default class TaskEdit extends Component{
       project:null,
       pausal:{value:true,label:'Pausal'},
     }
-    this.fetchData(this.props.match.params.taskID);
+    this.fetchData();
   }
 
   submitTask(){
@@ -46,22 +46,17 @@ export default class TaskEdit extends Component{
       project: this.state.project?this.state.project.id:null,
       pausal: this.state.pausal.value,
     }
-    rebase.updateDoc('/tasks/'+this.state.task.id, body)
+    rebase.addToCollection('/tasks', body)
     .then(()=>{
-      if(!this.props.columns){
-        this.props.history.goBack()
-      }
+      this.setState({saving:false,pausal:{value:true,label:'Pausal', description:''}})
+      this.fetchData();
     });
   }
 
-  fetchData(taskID){
-    rebase.get('tasks/'+taskID, {
+  fetchData(){
+    rebase.get('/statuses', {
       context: this,
       withIds: true,
-    }).then((task)=>{rebase.get('/statuses', {
-      context: this,
-      withIds: true,
-
     }).then((statuses)=>{rebase.get('/projects', {
       context: this,
       withIds: true,
@@ -78,46 +73,32 @@ export default class TaskEdit extends Component{
             context: this,
             withIds: true,
           }).then((workTypes)=>{
-            this.setData(task, this.toSelArr(statuses), this.toSelArr(projects),this.toSelArr(users,'email'),this.toSelArr(companies),this.toSelArr(workTypes));
+            this.setData(toSelArr(statuses), toSelArr(projects),toSelArr(users,'email'),toSelArr(companies),toSelArr(workTypes));
           });
         });
       });
-    })})});
+    })});
   }
 
-  toSelArr(arr,index = 'title'){
-    return arr.map((item)=>{return {...item,value:item.id,label:item[index]}})
-  }
-
-  setData(task, statuses, projects,users,companies,workTypes){
-    let project = projects.find((item)=>item.id===task.project);
-    let status = statuses.find((item)=>item.id===task.status);
-    let company = companies.find((item)=>item.id===task.company);
-    let workType = workTypes.find((item)=>item.id===task.workType);
-    let requester = users.find((item)=>item.id===task.requester);
-    let assigned = users.find((item)=>item.id===task.assigned);
-
-
-
+  setData(statuses, projects,users,companies,workTypes){
+    let status = statuses.find((item)=>item.title==='New');
+    if(!status){
+      status=null;
+    }
     this.setState({
-      task,
       statuses,
       projects,
       users,
       companies,
       workTypes,
-
-      description:task.description,
-      title:task.title,
-      pausal:task.pausal?{value:true,label:'Pausal'}:{value:false,label:'Project'},
-      status:status?status:null,
-      statusChange:task.statusChange?task.statusChange:null,
-      project:project?project:null,
-      company:company?company:null,
-      workHours:isNaN(parseInt(task.workHours))?0:parseInt(task.workHours),
-      workType:workType?workType:null,
-      requester:requester?requester:null,
-      assigned:assigned?assigned:null,
+      status,
+      statusChange:null,
+      project:null,
+      company:null,
+      workHours:0,
+      workType:null,
+      requester:null,
+      assigned:null,
       loading:false
     });
   }
@@ -325,8 +306,8 @@ export default class TaskEdit extends Component{
 
 
 
-        <Button bsStyle="success" className="separate" disabled={this.state.title==="" || this.state.status===null || this.state.project === null||this.state.saving}
-          onClick={this.submitTask.bind(this)}>{this.state.saving?'Saving...':'Save task'}</Button>
+        <Button bsStyle="primary" className="separate" disabled={this.state.title==="" || this.state.status===null || this.state.project === null||this.state.saving}
+          onClick={this.submitTask.bind(this)}>{this.state.saving?'Adding...':'Add task'}</Button>
       </div>
     );
   }

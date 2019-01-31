@@ -2,11 +2,7 @@ import React, { Component } from 'react';
 import { FormGroup, FormControl, Button, Col, ControlLabel } from 'react-bootstrap';
 import Select from 'react-select';
 import {rebase} from '../index';
-
-const isEmail = (email) => {
-  return (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/).test(email);
-}
-
+import {isEmail} from '../helperFunctions';
 
 export default class UserEdit extends Component{
   constructor(props){

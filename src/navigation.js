@@ -12,10 +12,10 @@ import WorkTypeList from './settings/workTypeList';
 import UserList from './settings/userList';
 import Pricelist from './settings/priceList';
 
-import TaskList from './taskList';
-import TaskListColumns from './taskListColumns';
-import TaskEdit from './taskEdit';
-import TaskAdd from './taskAdd';
+import TaskList from './task/taskList';
+import TaskListColumns from './task/taskListColumns';
+import TaskEdit from './task/taskEdit';
+import TaskAdd from './task/taskAdd';
 
 
 export default class Navigation extends Component {

@@ -107,9 +107,9 @@ export default class PriceEdit extends Component{
               materialMargin:parseFloat(this.state.margin===''?'0':this.state.margin)
             })
               .then((listResponse)=>{
-                this.state.workTypes.map((workType,index)=>{
-                  rebase.addToCollection('/prices', {pricelist:listResponse.id,workType:workType.id,price:parseFloat(workType.price.price === "" ? "0": workType.price.price)});
-                })
+                this.state.workTypes.map((workType,index)=>
+                  rebase.addToCollection('/prices', {pricelist:listResponse.id,workType:workType.id,price:parseFloat(workType.price.price === "" ? "0": workType.price.price)})
+                );
                 this.setState({saving:false,
                   pricelistName:'',
                   afterHours:0,
