@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, Button, Col, ControlLabel, Alert } from 'react-bootstrap';
 import Select from 'react-select';
-import {rebase} from '../index';
-import {toSelArr} from '../helperFunctions';
+import {rebase, database} from '../index';
+import {toSelArr, snapshotToArray} from '../helperFunctions';
 
 export default class TaskEdit extends Component{
   constructor(props){
@@ -54,30 +54,16 @@ export default class TaskEdit extends Component{
   }
 
   fetchData(){
-    rebase.get('/statuses', {
-      context: this,
-      withIds: true,
-    }).then((statuses)=>{rebase.get('/projects', {
-      context: this,
-      withIds: true,
-    }).then((projects)=>{
-      rebase.get('/users', {
-        context: this,
-        withIds: true,
-      }).then((users)=>{
-        rebase.get('/companies', {
-          context: this,
-          withIds: true,
-        }).then((companies)=>{
-          rebase.get('/workTypes', {
-            context: this,
-            withIds: true,
-          }).then((workTypes)=>{
-            this.setData(toSelArr(statuses), toSelArr(projects),toSelArr(users,'email'),toSelArr(companies),toSelArr(workTypes));
-          });
-        });
-      });
-    })});
+    Promise.all(
+      [
+        database.collection('statuses').get(),
+        database.collection('projects').get(),
+        database.collection('users').get(),
+        database.collection('companies').get(),
+        database.collection('workTypes').get(),
+    ]).then(([statuses,projects,users, companies, workTypes])=>{
+      this.setData(toSelArr(snapshotToArray(statuses)), toSelArr(snapshotToArray(projects)),toSelArr(snapshotToArray(users),'email'),toSelArr(snapshotToArray(companies)),toSelArr(snapshotToArray(workTypes)));
+    });
   }
 
   setData(statuses, projects,users,companies,workTypes){

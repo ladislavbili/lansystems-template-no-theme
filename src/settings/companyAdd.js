@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, Button, Col, ControlLabel, Alert } from 'react-bootstrap';
 import Select from 'react-select';
-import {toSelArr} from '../helperFunctions';
-import {rebase} from '../index';
+import {toSelArr, snapshotToArray} from '../helperFunctions';
+import {rebase,database} from '../index';
 
 export default class CompanyAdd extends Component{
   constructor(props){
@@ -20,10 +20,7 @@ export default class CompanyAdd extends Component{
   }
 
   fetchData(){
-    rebase.get('pricelists', {
-      context: this,
-      withIds:true,
-    }).then((pricelists)=>this.setData(toSelArr(pricelists)));
+    database.collection('pricelists').get().then((pricelists)=>this.setData(toSelArr(snapshotToArray(pricelists))));
   }
 
   setData(pricelists){

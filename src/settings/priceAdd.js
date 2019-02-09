@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, Button, Col, ControlLabel, Alert } from 'react-bootstrap';
-import {rebase} from '../index';
+import {rebase, database} from '../index';
+import {snapshotToArray} from '../helperFunctions';
 
 export default class PriceEdit extends Component{
   constructor(props){
@@ -19,6 +20,13 @@ export default class PriceEdit extends Component{
   }
 
   loadData(){
+    Promise.all(
+      [
+        database.collection('workTypes').get(),
+        database.collection('prices').get()
+    ]).then(([ workTypes,prices])=>{
+      this.setData(snapshotToArray(prices),snapshotToArray(workTypes));
+    });
     rebase.get('/prices', {
       context: this,
       withIds: true,

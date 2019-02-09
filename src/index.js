@@ -14,12 +14,11 @@ import './scss/index.scss';
 
 const store=createStore();
 const app = firebase.initializeApp(config);
-const db = firebase.firestore(app);
+let db = firebase.firestore(app);
 const settings = { timestampsInSnapshots: true };
 db.settings(settings);
-
 export let rebase = Rebase.createClass(db);
-
+export let database = db;
 const Root = () => {
   return(
     <Provider store={store}>

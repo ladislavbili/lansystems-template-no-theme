@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, Button, Col, ControlLabel, Alert, Table } from 'react-bootstrap';
 import Select from 'react-select';
-import {rebase} from '../index';
-import {toSelArr} from '../helperFunctions';
+import {rebase, database} from '../index';
+import {toSelArr, snapshotToArray} from '../helperFunctions';
 import AddServiceMaterial from './addServiceMaterial';
 import EditService from './editService';
 import EditMaterial from './editMaterial';
@@ -68,6 +68,8 @@ export default class TaskEdit extends Component{
     .then(()=>{
       if(!this.props.columns){
         this.props.history.goBack()
+      }else{
+        this.setState({saving:false});
       }
     });
   }
@@ -109,80 +111,24 @@ export default class TaskEdit extends Component{
   }
 
   fetchData(taskID){
-    rebase.get('tasks/'+taskID, {
-      context: this,
-      withIds: true,
-    }).then((task)=>{rebase.get('/statuses', {
-      context: this,
-      withIds: true,
-
-    }).then((statuses)=>{rebase.get('/projects', {
-      context: this,
-      withIds: true,
-    }).then((projects)=>{
-      rebase.get('/users', {
-        context: this,
-        withIds: true,
-      }).then((users)=>{
-        rebase.get('/companies', {
-          context: this,
-          withIds: true,
-        }).then((companies)=>{
-          rebase.get('/workTypes', {
-            context: this,
-            withIds: true,
-          }).then((workTypes)=>{
-            rebase.get('/units', {
-              context: this,
-              withIds: true,
-            }).then((units)=>{
-              rebase.get('/prices', {
-                context: this,
-                withIds: true,
-              }).then((prices)=>{
-                rebase.get('/pricelists', {
-                  context: this,
-                  withIds: true,
-                }).then((pricelists)=>{
-                rebase.get('/taskMaterials', {
-                  context: this,
-                  query: (ref) => ref.where('task', '==', task.id),
-                  withIds: true,
-                }).then((taskMaterials)=>{
-                  rebase.get('/taskWorks', {
-                    context: this,
-                    query: (ref) => ref.where('task', '==', task.id),
-                    withIds: true,
-                  }).then((taskWorks)=>{
-                      this.setData(task, toSelArr(statuses), toSelArr(projects),toSelArr(users,'email'),toSelArr(companies),toSelArr(workTypes),
-                      toSelArr(units), prices,taskMaterials,taskWorks,pricelists);
-                    }).catch(()=>{
-                      let taskWorks=[];
-                      this.setData(task, toSelArr(statuses), toSelArr(projects),toSelArr(users,'email'),toSelArr(companies),toSelArr(workTypes),
-                      toSelArr(units), prices,taskMaterials,taskWorks,pricelists);
-                    })
-                  }).catch(()=>{
-                    let taskMaterials=[];
-                    rebase.get('/taskWorks', {
-                      context: this,
-                      query: (ref) => ref.where('task', '==', task.id),
-                      withIds: true,
-                    }).then((taskWorks)=>{
-                        this.setData(task, toSelArr(statuses), toSelArr(projects),toSelArr(users,'email'),toSelArr(companies),toSelArr(workTypes),
-                        toSelArr(units), prices,taskMaterials,taskWorks,pricelists);
-                      }).catch(()=>{
-                        let taskWorks=[];
-                        this.setData(task, toSelArr(statuses), toSelArr(projects),toSelArr(users,'email'),toSelArr(companies),toSelArr(workTypes),
-                        toSelArr(units), prices,taskMaterials,taskWorks,pricelists);
-                      })
-                  })
-                })
-              })
-            })
-          });
-        });
-      });
-    })})});
+    Promise.all(
+      [
+        database.collection('tasks').doc(taskID).get(),
+        database.collection('statuses').get(),
+        database.collection('projects').get(),
+        database.collection('companies').get(),
+        database.collection('workTypes').get(),
+        database.collection('units').get(),
+        database.collection('prices').get(),
+        database.collection('pricelists').get(),
+        database.collection('users').get(),
+        database.collection('taskMaterials').where("task", "==", taskID).get(),
+        database.collection('taskWorks').where("task", "==", taskID).get()
+    ]).then(([task,statuses,projects, companies, workTypes, units, prices, pricelists, users,taskMaterials, taskWorks])=>{
+      this.setData({id:task.id,...task.data()}, toSelArr(snapshotToArray(statuses)), toSelArr(snapshotToArray(projects)),toSelArr(snapshotToArray(users),'email'),
+      toSelArr(snapshotToArray(companies)),toSelArr(snapshotToArray(workTypes)),
+      toSelArr(snapshotToArray(units)), snapshotToArray(prices),snapshotToArray(taskMaterials),snapshotToArray(taskWorks),snapshotToArray(pricelists));
+    });
   }
 
   setData(task, statuses, projects,users,companies,workTypes,units, prices,taskMaterials,taskWorks,pricelists){
