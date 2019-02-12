@@ -27,16 +27,6 @@ export default class PriceEdit extends Component{
     ]).then(([ workTypes,prices])=>{
       this.setData(snapshotToArray(prices),snapshotToArray(workTypes));
     });
-    rebase.get('/prices', {
-      context: this,
-      withIds: true,
-    }).then((prices)=>{rebase.get('/workTypes', {
-      context: this,
-      withIds: true,
-    }).then((workTypes)=>{
-      this.setData(prices,workTypes);
-    })});
-
   }
 
   setData(prices,workTypes){

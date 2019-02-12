@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, Button, Col, ControlLabel } from 'react-bootstrap';
 import Select from 'react-select';
-import {rebase} from '../index';
-import {isEmail} from '../helperFunctions';
+import {rebase, database} from '../index';
+import {snapshotToArray, isEmail} from '../helperFunctions';
 
 export default class UserEdit extends Component{
   constructor(props){
@@ -17,27 +17,28 @@ export default class UserEdit extends Component{
       companies:[]
     }
     this.setData.bind(this);
-    rebase.get('users/'+this.props.match.params.id, {
-      context: this,
-    }).then((user)=>{
-      this.setData(user);
-      rebase.get('companies', {
-        context: this,
-        withIds: true,
-      }).then((companies)=>{
-        let company;
-        if(companies.length===0){
-          company=null;
+
+    Promise.all(
+      [
+        database.collection('companies').get(),
+        rebase.get('users/'+this.props.match.params.id, {
+          context: this,
+        })
+    ]).then(([ companiesData,user])=>{
+      let companies = snapshotToArray(companiesData);
+      let company;
+      if(companies.length===0){
+        company=null;
+      }else{
+        company=companies.find((item)=>item.id===user.company);
+        if(company){
+          company= {...company,label:company.title,value:company.id};
         }else{
-          company=companies.find((item)=>item.id===user.company);
-          if(company){
-            company= {...company,label:company.title,value:company.id};
-          }else{
-            company=null;
-          }
+          company=null;
         }
-        this.setState({companies,company});
-      });
+      }
+      this.setData(user);
+      this.setState({companies,company});
     });
   }
 

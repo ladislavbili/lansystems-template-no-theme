@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, Button, Col, ControlLabel } from 'react-bootstrap';
 import Select from 'react-select';
-import {rebase} from '../index';
-import {isEmail} from '../helperFunctions';
+import {rebase, database} from '../index';
+import {snapshotToArray, isEmail} from '../helperFunctions';
 
 export default class UserAdd extends Component{
   constructor(props){
@@ -16,10 +16,8 @@ export default class UserAdd extends Component{
       saving:false,
       companies:[]
     }
-    rebase.get('companies', {
-      context: this,
-      withIds: true,
-    }).then((companies)=>{
+    database.collection('workTypes').get().then((data)=>{
+      let companies=snapshotToArray(data);
       this.setState({companies,company:companies.length===0 ? null :{...companies[0],label:companies[0].title,value:companies[0].id}});
     });
   }

@@ -12,6 +12,7 @@ import WorkTypeList from './settings/workTypeList';
 import UserList from './settings/userList';
 import PriceList from './settings/priceList';
 import SupplierList from './settings/supplierList';
+import SupplierInvoiceList from './settings/supplierInvoiceList';
 
 import TaskList from './task/taskList';
 import TaskListColumns from './task/taskListColumns';
@@ -53,6 +54,8 @@ export default class Navigation extends Component {
               <Route exact path='/helpdesk/settings/pricelists/:id' component={PriceList} />
               <Route exact path='/helpdesk/settings/suppliers' component={SupplierList} />
               <Route exact path='/helpdesk/settings/suppliers/:id' component={SupplierList} />
+              <Route exact path='/helpdesk/settings/supplierInvoices' component={SupplierInvoiceList} />
+              <Route exact path='/helpdesk/settings/supplierInvoices/:id' component={SupplierInvoiceList} />
             </div>
           </div>
       </div>
